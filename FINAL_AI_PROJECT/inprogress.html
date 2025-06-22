@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>In-Progress Complaints</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+</head>
+<body>
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="logo-section">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/7/7f/Seal_of_Sikkim_greyscale.png" alt="Sikkim Logo" class="logo" />
+                <div class="logo-title">Admin Panel</div>
+                <div class="logo-subtitle">Complaint Management</div>
+            </div>
+            <nav>
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <a href="admin-dashboard.html" class="nav-link active">
+                            <span class="nav-icon">📊</span>
+                            Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="All-Complaints.html" class="nav-link">
+                            <span class="nav-icon">📋</span>
+                            All Complaints
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="pending.html" class="nav-link">
+                            <span class="nav-icon">⏳</span>
+                            Pending
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="inprogress.html" class="nav-link">
+                            <span class="nav-icon">🔄</span>
+                            In Progress
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="resolved.html" class="nav-link">
+                            <span class="nav-icon">✅</span>
+                            Resolved
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="analytics.html" class="nav-link">
+                            <span class="nav-icon">📈</span>
+                            Analytics
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="admin-profile.html" class="nav-link">
+                            <span class="nav-icon">👤</span>
+                            Profile
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="dashboard_final.html" class="nav-link">
+                            <span class="nav-icon">🏠</span>
+                            Public Dashboard
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <div class="header">
+        <h2>In-Progress Complaints</h2>
+        <div class="user-info">
+          <div class="user-avatar">GA</div>
+        </div>
+      </div>
+
+      <section class="complaints-section">
+        <div class="section-header">
+          <h3 class="section-title">Complaints</h3>
+        </div>
+
+        <!-- Example In-Progress Complaint -->
+        <div class="complaint-item in-progress">
+          <div class="complaint-header">
+            <span class="complaint-id">#CMP67890</span>
+            <select class="status-dropdown">
+              <option>Pending</option>
+              <option selected>In Progress</option>
+              <option>Resolved</option>
+            </select>
+          </div>
+          <p class="complaint-content">Garbage has not been collected in the New Market area for the past week. It's becoming a health issue.</p>
+          <div class="complaint-meta">
+            <div class="meta-item"><i class="fas fa-calendar-alt"></i> May 24, 2025</div>
+            <div class="meta-item"><i class="fas fa-map-marker-alt"></i> New Market</div>
+          </div>
+          <div class="complaint-actions">
+            <a href="#" class="btn btn-primary">View Details</a>
+            <a href="#" class="btn btn-success">Mark Resolved</a>
+          </div>
+        </div>
+
+        <!-- Add more complaints dynamically if needed -->
+      </section>
+    </main>
+  </div>
+</body>
+</html>

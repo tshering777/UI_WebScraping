@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sikkim Complaint Portal - Admin Dashboard</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+</head>
+<body>
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="logo-section">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/7/7f/Seal_of_Sikkim_greyscale.png" alt="Sikkim Logo" class="logo" />
+                <div class="logo-title">Admin Panel</div>
+                <div class="logo-subtitle">Complaint Management</div>
+            </div>
+            <nav>
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <a href="admin-dashboard.html" class="nav-link active">
+                            <span class="nav-icon">📊</span>
+                            Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="All-Complaints.html" class="nav-link">
+                            <span class="nav-icon">📋</span>
+                            All Complaints
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="pending.html" class="nav-link">
+                            <span class="nav-icon">⏳</span>
+                            Pending
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="inprogress.html" class="nav-link">
+                            <span class="nav-icon">🔄</span>
+                            In Progress
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="resolved.html" class="nav-link">
+                            <span class="nav-icon">✅</span>
+                            Resolved
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="analytics.html" class="nav-link">
+                            <span class="nav-icon">📈</span>
+                            Analytics
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="admin-profile.html" class="nav-link">
+                            <span class="nav-icon">👤</span>
+                            Profile
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="dashboard_final.html" class="nav-link">
+                            <span class="nav-icon">🏠</span>
+                            Public Dashboard
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="header">
+                <h2>Admin Dashboard</h2>
+                <div class="user-info">
+                    <span>Welcome back, Admin!</span>
+                    <div class="user-avatar">A</div>
+                </div>
+            </header>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <span class="stat-title">Total Complaints</span>
+                        <div class="stat-icon">📋</div>
+                    </div>
+                    <div class="stat-value" id="totalComplaints">0</div>
+                    <div class="stat-change positive">
+                        <span>↗</span> Live updates
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <span class="stat-title">Pending Review</span>
+                        <div class="stat-icon">⏳</div>
+                    </div>
+                    <div class="stat-value" id="pendingComplaints">0</div>
+                    <div class="stat-change" id="pendingChange">
+                        <span>→</span> Needs attention
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <span class="stat-title">In Progress</span>
+                        <div class="stat-icon">🔄</div>
+                    </div>
+                    <div class="stat-value" id="inProgressComplaints">0</div>
+                    <div class="stat-change positive">
+                        <span>↗</span> Being processed
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <span class="stat-title">Resolved</span>
+                        <div class="stat-icon">✅</div>
+                    </div>
+                    <div class="stat-value" id="resolvedComplaints">0</div>
+                    <div class="stat-change positive">
+                        <span>↗</span> Completed
+                    </div>
+                </div>
+            </div>
+
+            <div class="complaints-section">
+                <div class="section-header">
+                    <h3 class="section-title">Complaint Management</h3>
+                    <div class="filter-buttons">
+                        <button class="filter-btn active" data-filter="all">All</button>
+                        <button class="filter-btn" data-filter="pending">Pending</button>
+                        <button class="filter-btn" data-filter="in-progress">In Progress</button>
+                        <button class="filter-btn" data-filter="resolved">Resolved</button>
+                    </div>
+                </div>
+                
+                <div class="loading" id="complaintsLoading">
+                    <div class="spinner"></div>
+                    <p>Loading complaints...</p>
+                </div>
+                
+                <div id="complaintsContainer"></div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal for complaint details -->
+    <div id="complaintModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Complaint Details</h3>
+                <button class="close-btn">&times;</button>
+            </div>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCqNDsCCmQ32RqJduAytKhoOHlepw2WA1s",
+            authDomain: "final-ai-project-2ec51.firebaseapp.com",
+            projectId: "final-ai-project-2ec51",
+            storageBucket: "final-ai-project-2ec51.appspot.com",
+            messagingSenderId: "788557714998",
+            appId: "1:788557714998:web:60653b6d866a6903402a97"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        let allComplaints = [];
+        let currentFilter = 'all';
+
+        function initAdminDashboard() {
+            const complaintsRef = ref(database, 'complaints');
+            
+            onValue(complaintsRef, (snapshot) => {
+                const data = snapshot.val();
+                allComplaints = [];
+
+                if (data) {
+                    for (let id in data) {
+                        allComplaints.push({
+                            id,
+                            ...data[id]
+                        });
+                    }
+                    
+                    allComplaints.sort((a, b) => new Date(b.createdAt || b.timestamp) - new Date(a.createdAt || a.timestamp));
+                }
+
+                document.getElementById('complaintsLoading').style.display = 'none';
+                updateStatistics();
+                displayComplaints();
+            });
+
+            setupEventListeners();
+        }
+
+        function updateStatistics() {
+            const total = allComplaints.length;
+            const pending = allComplaints.filter(c => c.status === 'Pending').length;
+            const inProgress = allComplaints.filter(c => c.status === 'In Progress').length;
+            const resolved = allComplaints.filter(c => c.status === 'Resolved').length;
+
+            document.getElementById('totalComplaints').textContent = total;
+            document.getElementById('pendingComplaints').textContent = pending;
+            document.getElementById('inProgressComplaints').textContent = inProgress;
+            document.getElementById('resolvedComplaints').textContent = resolved;
+
+            // Update pending status indicator
+            const pendingChangeEl = document.getElementById('pendingChange');
+            if (pending > 0) {
+                pendingChangeEl.innerHTML = '<span>⚠️</span> Needs attention';
+                pendingChangeEl.className = 'stat-change negative';
+            } else {
+                pendingChangeEl.innerHTML = '<span>✅</span> All clear';
+                pendingChangeEl.className = 'stat-change positive';
+            }
+        }
+
+        function displayComplaints() {
+            const container = document.getElementById('complaintsContainer');
+            
+            let filteredComplaints = allComplaints;
+            if (currentFilter !== 'all') {
+                const statusMap = {
+                    'pending': 'Pending',
+                    'in-progress': 'In Progress',
+                    'resolved': 'Resolved'
+                };
+                filteredComplaints = allComplaints.filter(c => c.status === statusMap[currentFilter]);
+            }
+
+            if (filteredComplaints.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 2rem; color: #64748b;">
+                        <div style="font-size: 3rem; margin-bottom: 1rem;">📭</div>
+                        <h3>No complaints found</h3>
+                        <p>No complaints match the current filter.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = '';
+            filteredComplaints.forEach(complaint => {
+                const complaintElement = createComplaintElement(complaint);
+                container.appendChild(complaintElement);
+            });
+        }
+
+        function createComplaintElement(complaint) {
+            const div = document.createElement('div');
+            const statusClass = complaint.status.toLowerCase().replace(' ', '-');
+            div.className = `complaint-item ${statusClass}`;
+
+            const timeAgo = getTimeAgo(new Date(complaint.createdAt || complaint.timestamp));
+            const shortId = complaint.id ? complaint.id.substring(0, 8).toUpperCase() : 'N/A';
+
+            div.innerHTML = `
+                <div class="complaint-header">
+                    <div class="complaint-id">ID: ${shortId}</div>
+                    <select class="status-dropdown" data-id="${complaint.id}">
+                        <option value="Pending" ${complaint.status === 'Pending' ? 'selected' : ''}>Pending</option>
+                        <option value="In Progress" ${complaint.status === 'In Progress' ? 'selected' : ''}>In Progress</option>
+                        <option value="Resolved" ${complaint.status === 'Resolved' ? 'selected' : ''}>Resolved</option>
+                    </select>
+                </div>
+                <div class="complaint-content">${complaint.description || 'No description provided'}</div>
+                <div class="complaint-meta">
+                    <div class="meta-item">
+                        <span>🕒</span>
+                        <span>${timeAgo}</span>
+                    </div>
+                    <div class="meta-item">
+                        <span>📂</span>
+                        <span>${complaint.category || 'General'}</span>
+                    </div>
+                    <div class="meta-item">
+                        <span>👤</span>
+                        <span>${complaint.name || 'Anonymous'}</span>
+                    </div>
+                    <div class="meta-item">
+                        <span>📧</span>
+                        <span>${complaint.email || 'No email'}</span>
+                    </div>
+                    <div class="meta-item">
+                        <span>📞</span>
+                        <span>${complaint.phone || 'No phone'}</span>
+                    </div>
+                    ${complaint.latitude && complaint.longitude ? `
+                        <div class="meta-item">
+                            <span>📍</span>
+                            <span>Lat: ${complaint.latitude.toFixed(4)}, Lng: ${complaint.longitude.toFixed(4)}</span>
+                        </div>
+                    ` : ''}
+                </div>
+                <div class="complaint-actions">
+                    <button class="btn btn-primary" onclick="viewComplaintDetails('${complaint.id}')">View Details</button>
+                    ${complaint.latitude && complaint.longitude ? 
+                        `<button class="btn btn-warning" onclick="viewLocation(${complaint.latitude}, ${complaint.longitude})">View Location</button>` : ''
+                    }
+                    ${complaint.status === 'Pending' ? 
+                        `<button class="btn btn-success" onclick="markInProgress('${complaint.id}')">Start Processing</button>` : ''
+                    }
+                    ${complaint.status === 'In Progress' ? 
+                        `<button class="btn btn-success" onclick="markResolved('${complaint.id}')">Mark Resolved</button>` : ''
+                    }
+                </div>
+            `;
+
+            return div;
+        }
+
+        function setupEventListeners() {
+            // Filter buttons
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    currentFilter = this.dataset.filter;
+                    displayComplaints();
+                });
+            });
+
+            // Status dropdown changes
+            document.addEventListener('change', function(e) {
+                if (e.target.classList.contains('status-dropdown')) {
+                    const complaintId = e.target.dataset.id;
+                    const newStatus = e.target.value;
+                    updateComplaintStatus(complaintId, newStatus);
+                }
+            });
+
+            // Modal close
+            document.querySelector('.close-btn').addEventListener('click', function() {
+                document.getElementById('complaintModal').style.display = 'none';
+            });
+
+            // Close modal on outside click
+            document.getElementById('complaintModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.style.display = 'none';
+                }
+            });
+        }
+
+        function updateComplaintStatus(complaintId, newStatus) {
+            const updates = {};
+            updates[`complaints/${complaintId}/status`] = newStatus;
+            updates[`complaints/${complaintId}/updatedAt`] = new Date().toISOString();
+
+            update(ref(database), updates)
+                .then(() => {
+                    console.log(`Complaint ${complaintId} status updated to ${newStatus}`);
+                })
+                .catch((error) => {
+                    console.error('Error updating status:', error);
+                    alert('Error updating complaint status. Please try again.');
+                });
+        }
+
+        // Global functions for button actions
+        window.viewComplaintDetails = function(complaintId) {
+            const complaint = allComplaints.find(c => c.id === complaintId);
+            if (!complaint) return;
+
+            const modal = document.getElementById('complaintModal');
+            const modalBody = document.getElementById('modalBody');
+
+            modalBody.innerHTML = `
+                <div class="form-group">
+                    <label class="form-label">Complaint ID</label>
+                    <input type="text" class="form-input" value="${complaint.id}" readonly>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Name</label>
+                    <input type="text" class="form-input" value="${complaint.name || 'N/A'}" readonly>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input type="text" class="form-input" value="${complaint.email || 'N/A'}" readonly>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Phone</label>
+                    <input type="text" class="form-input" value="${complaint.phone || 'N/A'}" readonly>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Category</label>
+                    <input type="text" class="form-input" value="${complaint.category || 'General'}" readonly>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Description</label>
+                    <textarea class="form-textarea" readonly>${complaint.description || 'No description provided'}</textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Status</label>
+                    <input type="text" class="form-input" value="${complaint.status}" readonly>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Created At</label>
+                    <input type="text" class="form-input" value="${new Date(complaint.createdAt || complaint.timestamp).toLocaleString()}" readonly>
+                </div>
+                ${complaint.latitude && complaint.longitude ? `
+                    <div class="form-group">
+                        <label class="form-label">Location</label>
+                        <input type="text" class="form-input" value="Lat: ${complaint.latitude.toFixed(4)}, Lng: ${complaint.longitude.toFixed(4)}" readonly>
+                    </div>
+                ` : ''}
+                <div class="form-group">
+                    <button class="btn btn-primary" onclick="window.open('https://www.google.com/maps?q=${complaint.latitude},${complaint.longitude}', '_blank')">View on Map</button>
+                </div>
+            `;
+
+            modal.style.display = 'block';
+        };
+
+        window.viewLocation = function(latitude, longitude) {
+            window.open(`https://www.google.com/maps?q=${latitude},${longitude}`, '_blank');
+        };
+
+        window.markInProgress = function(complaintId) {
+            updateComplaintStatus(complaintId, 'In Progress');
+        };
+
+        window.markResolved = function(complaintId) {
+            updateComplaintStatus(complaintId, 'Resolved');
+        };
+
+        function getTimeAgo(date) {
+            const now = new Date();
+            const diffInSeconds = Math.floor((now - date) / 1000);
+            
+            if (diffInSeconds < 60) return 'Just now';
+            if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} minutes ago`;
+            if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} hours ago`;
+            if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 86400)} days ago`;
+            return `${Math.floor(diffInSeconds / 2592000)} months ago`;
+        }
+
+        // Initialize the dashboard when DOM is loaded
+        document.addEventListener('DOMContentLoaded', initAdminDashboard);
+    </script>
+</body>
+</html>
